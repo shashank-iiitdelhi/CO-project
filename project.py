@@ -1,3 +1,35 @@
+def movImm(regval,reg,temp):
+    regval[reg]=format(int(temp),"016b")
+
+def movReg(regval,reg1,reg2):
+    regval[reg1]=regval[reg2]
+
+def load(regval,reg,var,address):
+    regval[reg]=var[address]
+
+def store(regval,reg,var,address):
+    var[address]=regval[reg]
+
+def multiply(regval,reg1,reg2,reg3):
+    prod=bin(int(regval[reg2],2)*int(regval[reg3],2))[2:]
+    if len(prod)>7:
+        regval["FLAGS"]="0000000000001000"
+        regval[reg1]="0000000000000000"
+    else:
+        regval["FLAGS"]="0000000000000000"
+        regval[reg1]=format(int(prod,2),"016b")
+
+def divide(regval,reg1,reg2):
+    if regval[reg2]=="0000000000000000":
+        regval["FLAGS"]="0000000000001000"
+        regval["R0"]="0000000000000000"
+        regval["R1"]="0000000000000000"
+    else:
+        regval["R0"]=regval[reg1]//regval[reg2]
+        regval["R1"]=regval[reg1]%regval[reg2]
+        regval["FLAGS"]="0000000000000000"
+
+
 def cmp(regval,reg1,reg2):
     if (regval[reg1]<regval[reg2]):
         regval["FLAGS"]="0000000000000100"
@@ -14,7 +46,7 @@ def jlt(regval,pc,address,labels):
 
 op={"add":"00000","sub":"00001","movi":"00010","mov":"00011","ld":"00100","st":"00101","mul":"00110","div":"00111","rs":"01000","ls":"01001","xor":"01010","or":"01011","and":"01100","not":"01101","cmp":"01110","jmp":"01111","jlt":"11100","jgt":"11101","je":"11111","hlt":"11010"}
 reg={"R0":"000","R1":"001","R2":"010","R3":"011","R4":"100","R5":"101","R6":"110","FLAGS":"111"}
-regval={"FLAGS":"0000000000000000"}
+regval={"R0":"0000000000000000","R1":"0000000000000000","R2":"0000000000000000","R3":"0000000000000000","R4":"0000000000000000","R5":"0000000000000000","R6":"0000000000000000","FLAGS":"0000000000000000"}
 var={}
 mem={}
 labels={}
@@ -115,9 +147,10 @@ while True:
     if "hlt" in addresses[bin_pc]:
         break
     if ("mov" in temp[pc].split()[0]) and (temp[pc].split()[2][0]=="$"):
-        regval[temp[pc].split()[1]]=int(temp[pc].split()[2][1:])
+        movImm(regval,temp[pc].split()[1],temp[pc].split()[2][1:])
     elif "mul" in temp[pc].split()[0]:
-        regval[temp[pc].split()[1]]=regval[temp[pc].split()[2]]*regval[temp[pc].split()[3]]
+        multiply(regval,temp[pc].split()[1],temp[pc].split()[2],temp[pc].split()[2])
+        flag=False
     elif "st" in temp[pc].split()[0]:
         var[temp[pc].split()[2]]=regval[temp[pc].split()[1]]
     elif "cmp" in temp[pc].split()[0]:
