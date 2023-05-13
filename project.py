@@ -50,7 +50,7 @@ regval={"R0":"0000000000000000","R1":"0000000000000000","R2":"0000000000000000",
 var={}
 mem={}
 labels={}
-f=open("test1.txt","r")
+f=open("test.txt","r")
 lines=[]
 addresses={}
 for line in f.readlines():
@@ -80,17 +80,17 @@ for i,j in addresses.items():
         cin=j.split()[0].index(":")
         labels[j.split()[0][:cin]]=i
 temp=[]
-f=open("test1.txt","r")
+f=open("test.txt","r")
 for line in f.readlines():
     if line.strip()!="" and line.strip().split()[0]!="var":
         temp.append(line.strip())
 f.close()
 ans=[]
-print(addresses)
-print(var)
-print(labels)
-print(mem)
-print(temp)
+# print(addresses)
+# print(var)
+# print(labels)
+# print(mem)
+# print(temp)
 for lines in temp:
     line=lines.split()
     t=""
@@ -141,18 +141,24 @@ while True:
     if flag:
         regval["FLAGS"]="0000000000000000"
     flag=True
-    print(pc)
-    print(regval)
+    # print(pc)
+    # print(regval)
     bin_pc=format(pc,"07b")
     if "hlt" in addresses[bin_pc]:
         break
     if ("mov" in temp[pc].split()[0]) and (temp[pc].split()[2][0]=="$"):
         movImm(regval,temp[pc].split()[1],temp[pc].split()[2][1:])
+    elif ("mov" in temp[pc].split()[0]) and (temp[pc].split()[2][0]!="$"):
+        movReg(regval,temp[pc].split()[1],temp[pc].split()[2])
+    elif "ld" in temp[pc].split()[0]:
+        load(regval,temp[pc].split()[1],var,temp[pc].split()[2])
     elif "mul" in temp[pc].split()[0]:
         multiply(regval,temp[pc].split()[1],temp[pc].split()[2],temp[pc].split()[2])
         flag=False
+    elif "div" in temp[pc].split()[0]:
+        divide(regval,temp[pc].split()[1],temp[pc].split()[2])
     elif "st" in temp[pc].split()[0]:
-        var[temp[pc].split()[2]]=regval[temp[pc].split()[1]]
+        store(regval,temp[pc].split()[1],var,temp[pc].split()[2])
     elif "cmp" in temp[pc].split()[0]:
         cmp(regval,temp[pc].split()[1],temp[pc].split()[2])
         flag=False
@@ -162,7 +168,7 @@ while True:
     pc+=1
 for i in ans:
     print(i)
-print(addresses)
-print(var)
-print(labels)
-print(mem)
+# print(addresses)
+# print(var)
+# print(labels)
+# print(mem)
