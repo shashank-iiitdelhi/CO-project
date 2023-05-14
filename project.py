@@ -29,6 +29,23 @@ def divide(regval,reg1,reg2):
         regval["R1"]=regval[reg1]%regval[reg2]
         regval["FLAGS"]="0000000000000000"
 
+def add(regval, reg1, reg2, reg3):
+    sum=bin(int(regval[reg2],2)+int(regval[reg3],2))[2:]
+    if len(sum)>7:
+        regval["FLAGS"]="0000000000001000"
+        regval[reg1]="0000000000000000"
+    else:
+        regval["FLAGS"]="0000000000000000"
+        regval[reg1]=format(int(sum,2),"016b")
+
+def sub(regval, reg1, reg2, reg3, dic):
+    dif=bin(int(regval[reg2],2)-int(regval[reg3],2))[2:]
+    if len(dif)>7:
+        regval["FLAGS"]="0000000000001000"
+        regval[reg1]="0000000000000000"
+    else:
+        regval["FLAGS"]="0000000000000000"
+        regval[reg1]=format(int(dif,2),"016b")
 
 def cmp(regval,reg1,reg2):
     if (regval[reg1]<regval[reg2]):
@@ -43,6 +60,22 @@ def jlt(regval,pc,address,labels):
         pc=int(labels[address],2)
         return pc
     return pc+1
+
+def jgt(regval,pc,address,labels):
+    if regval["FLAGS"][-2]=="1":
+        pc=int(labels[address],2)
+        return pc
+    return pc+1
+
+def je(regval,pc,address,labels):
+    if regval["FLAGS"][-1]=="1":
+        pc=int(labels[address],2)
+        return pc
+    return pc+1
+
+def jmp(pc,address,labels):
+    pc=int(labels[address],2)
+    return pc
 
 op={"add":"00000","sub":"00001","movi":"00010","mov":"00011","ld":"00100","st":"00101","mul":"00110","div":"00111","rs":"01000","ls":"01001","xor":"01010","or":"01011","and":"01100","not":"01101","cmp":"01110","jmp":"01111","jlt":"11100","jgt":"11101","je":"11111","hlt":"11010"}
 reg={"R0":"000","R1":"001","R2":"010","R3":"011","R4":"100","R5":"101","R6":"110","FLAGS":"111"}
@@ -150,6 +183,12 @@ while True:
         movImm(regval,temp[pc].split()[1],temp[pc].split()[2][1:])
     elif ("mov" in temp[pc].split()[0]) and (temp[pc].split()[2][0]!="$"):
         movReg(regval,temp[pc].split()[1],temp[pc].split()[2])
+    elif "add" in temp[pc].split()[0]:
+        add(regval,temp[pc].split()[1],temp[pc].split()[2],temp[pc].split()[2])
+        flag=False
+    elif "sub" in temp[pc].split()[0]:
+        sub(regval,temp[pc].split()[1],temp[pc].split()[2],temp[pc].split()[2])
+        flag=False
     elif "ld" in temp[pc].split()[0]:
         load(regval,temp[pc].split()[1],var,temp[pc].split()[2])
     elif "mul" in temp[pc].split()[0]:
@@ -157,6 +196,7 @@ while True:
         flag=False
     elif "div" in temp[pc].split()[0]:
         divide(regval,temp[pc].split()[1],temp[pc].split()[2])
+        flag=False
     elif "st" in temp[pc].split()[0]:
         store(regval,temp[pc].split()[1],var,temp[pc].split()[2])
     elif "cmp" in temp[pc].split()[0]:
@@ -164,6 +204,15 @@ while True:
         flag=False
     elif "jlt" in temp[pc].split()[0]:
         pc=jlt(regval,pc,temp[pc].split()[1],labels)
+        continue
+    elif "jgt" in temp[pc].split()[0]:
+        pc=jgt(regval,pc,temp[pc].split()[1],labels)
+        continue
+    elif "je" in temp[pc].split()[0]:
+        pc=je(regval,pc,temp[pc].split()[1],labels)
+        continue
+    elif "jmp" in temp[pc].split()[0]:
+        pc=jmp(pc,temp[pc].split()[1],labels)
         continue
     pc+=1
 for i in ans:
