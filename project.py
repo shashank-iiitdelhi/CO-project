@@ -10,8 +10,32 @@ def load(regval,reg,var,address):
 def store(regval,reg,var,address):
     var[address]=regval[reg]
 
+def xor(regval,reg1,reg2,reg3):
+    regval[reg1]=format(int(regval[reg2][9:],2) ^ int(regval[reg3][9:],2),"016b")
+
+def Or(regval,reg1,reg2,reg3):
+    regval[reg1]=format(int(regval[reg2][9:],2) | int(regval[reg3][9:],2),"016b")
+
+def And(regval,reg1,reg2,reg3):
+    regval[reg1]=format(int(regval[reg2][9:],2) & int(regval[reg3][9:],2),"016b")
+
+def invert(regval,reg1,reg2):
+    Not=""
+    for i in range(9,16):
+        if regval[reg2][i]=="0":
+            Not+="1"
+        elif regval[reg2][i]=="1":
+            Not+="0"
+    regval[reg1]=format(int(Not,2),"016b")
+
+def rshift(regval,reg1,num):
+    regval[reg1]=format(int(regval[reg1][9:],2)>>int(num),"016b")
+
+def lshift(regval,reg1,num):
+    regval[reg1]=format(int(regval[reg1][9:],2)<<int(num),"016b")
+
 def multiply(regval,reg1,reg2,reg3):
-    prod=bin(int(regval[reg2],2)*int(regval[reg3],2))[2:]
+    prod=bin(int(regval[reg2][9:],2)*int(regval[reg3][9:],2))[2:]
     if len(prod)>7:
         regval["FLAGS"]="0000000000001000"
         regval[reg1]="0000000000000000"
@@ -25,12 +49,12 @@ def divide(regval,reg1,reg2):
         regval["R0"]="0000000000000000"
         regval["R1"]="0000000000000000"
     else:
-        regval["R0"]=regval[reg1]//regval[reg2]
-        regval["R1"]=regval[reg1]%regval[reg2]
+        regval["R0"]=format(int(regval[reg1][9:],2)//int(regval[reg2][9:],2),"016b")
+        regval["R1"]=format(int(regval[reg1][9:],2)%int(regval[reg2][9:],2),"016b")
         regval["FLAGS"]="0000000000000000"
 
 def add(regval, reg1, reg2, reg3):
-    sum=bin(int(regval[reg2],2)+int(regval[reg3],2))[2:]
+    sum=bin(int(regval[reg2][9:],2)+int(regval[reg3][9:],2))[2:]
     if len(sum)>7:
         regval["FLAGS"]="0000000000001000"
         regval[reg1]="0000000000000000"
@@ -39,7 +63,7 @@ def add(regval, reg1, reg2, reg3):
         regval[reg1]=format(int(sum,2),"016b")
 
 def sub(regval, reg1, reg2, reg3, dic):
-    dif=bin(int(regval[reg2],2)-int(regval[reg3],2))[2:]
+    dif=bin(int(regval[reg2][9:],2)-int(regval[reg3][9:],2))[2:]
     if len(dif)>7:
         regval["FLAGS"]="0000000000001000"
         regval[reg1]="0000000000000000"
@@ -221,3 +245,5 @@ for i in ans:
 # print(var)
 # print(labels)
 # print(mem)
+
+    
